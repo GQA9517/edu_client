@@ -15,6 +15,8 @@ Vue.config.productionTip = false
 Vue.prototype.$axios = axios;
 Vue.use(Element);
 
+import "./static/js/gt.js"
+
 new Vue({
   router,
   store,

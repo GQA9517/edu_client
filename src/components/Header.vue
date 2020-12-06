@@ -5,11 +5,13 @@
         <div class="logo full-left">
           <router-link to="/"><img src="../static/image/logo.png" alt=""></router-link>
         </div>
-        <ul class="nav full-left">
-          <li v-for="(banner, index) in nav_list" :key="index" >
-            {{ banner.title }}
-          </li>
-        </ul>
+        <el-menu class="nav full-left">
+          <el-menu-item v-for="(banner, index) in nav_list" :key="index">
+            <el-link href="https://www.baidu.com">
+              {{ banner.title }}
+            </el-link>
+          </el-menu-item>
+        </el-menu>
         <div class="login-bar full-right">
           <div class="shop-cart full-left">
             <img src="../static/image/cart.svg" alt="">
@@ -47,7 +49,7 @@ export default {
           }
         }
         this.nav_list = list1
-        console.log(50, res.data)
+        console.log(52, res.data)
       }).catch(error => {
         console.log(error);
       })
