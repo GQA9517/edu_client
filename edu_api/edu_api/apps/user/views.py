@@ -1,8 +1,14 @@
+from django.db import transaction
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status as http_status
+from rest_framework import status as http_status, status
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
+
+from user.models import UserInfo
 
 from edu_api.libs.geetest import GeetestLib
+from user.serializers import UserModelSerializer
 from user.service import get_user_by_account
 
 pc_geetest_id = "759d5436a6bfe1e0a94d222e9452097b"
@@ -46,3 +52,52 @@ class CaptchaAPIView(APIView):
         print(result)
         result = {"status": "success"} if result else {"status": "fail"}
         return Response(result)
+
+
+class UserGenericAPIView(GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
+
+    def get_queryset(self):
+        return UserInfo.objects.all()
+
+    serializer_class = UserModelSerializer
+    lookup_field = 'id'
+
+    def sign_up(self, request, *args, **kwargs):
+        _ = self
+        with transaction.atomic():
+            return self.create(request, *args, **kwargs)
+
+
+class UserViewSet(ModelViewSet):
+    def sign_in(self, request, *args, **kwargs):
+        _ = self
+        username = request.data.get('username')
+        password = request.data.get('password')
+        # print(username, password, 35)
+        user = UserInfo.objects.filter(username=username, password=password)
+        if user:
+            return Response({
+                'message': '登录成功',
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'message': '登录失败',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def sign_up(self, request, *args, **kwargs):
+        _ = self
+        username = request.data.get('username')
+        name = request.data.get('name')
+        password = request.data.get('password')
+        gender = request.data.get('gender')
+        user = UserInfo.objects.filter(username=username)
+        print(54, gender, username, name, password)
+        if user:
+            return Response({
+                'message': '用户名已存在',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            UserInfo.objects.create(username=username, password=password, name=name, gender=gender)
+            return Response({
+                'message': '注册成功'
+            }, status=status.HTTP_200_OK)

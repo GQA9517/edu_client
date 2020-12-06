@@ -25,13 +25,6 @@ def get_user_by_account(account):
 class UserAuthentication(ModelBackend):
 
     def authenticate(self, request, username=None, password=None, **kwargs):
-        """
-        根据账号来获取用户对象
-        :param request:    请求对象
-        :param username:    前端输入的登录条件 手机号 用户名 邮箱
-        :param password: 密码
-        :return: 查询出的用户
-        """
         user = get_user_by_account(username)
 
         if user and user.check_password(password) and user.is_authenticated:

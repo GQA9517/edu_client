@@ -52,6 +52,12 @@ export default {
       remember_me: true
     }
   },
+  created() {
+    this.username = this.$route.query.username
+    this.password = this.$route.query.password
+    console.log(this.$route.query.password)
+    console.log(this.$route.query.username)
+  },
   methods: {
 
 
