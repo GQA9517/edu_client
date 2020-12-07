@@ -79,11 +79,11 @@ export default {
           let t = setInterval(() => {
             if (interval_time <= 1) {
               clearInterval(t);
-              this.sms_msg = '点击发送短信';
+              this.sms_code = '点击发送短信';
               this.flag = false;
             } else {
               this.is_send_sms = false;
-              this.sms_msg = `${interval_time}秒重新发送`;
+              this.sms_code = `${interval_time}秒重新发送`;
               interval_time--
             }
           }, 1000);

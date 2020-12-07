@@ -2,7 +2,9 @@
   <div class="footer">
     <ul>
       <li v-for="(banner, index) in nav_list" :key="index">
-        {{banner.title}}
+        <el-link href="https://www.baidu.com">
+          {{ banner.title }}
+        </el-link>
       </li>
     </ul>
   </div>
