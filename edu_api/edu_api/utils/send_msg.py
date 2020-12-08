@@ -12,12 +12,6 @@ class Message(object):
         self.single_send_url = constants.SINGLE_SEND_URL
 
     def send_message(self, phone, code):
-        """
-        短信发送的实现
-        phone: 要发送的手机号
-        code: 随机验证码
-        :return:
-        """
         params = {
             "apikey": self.api_key,
             "mobile": phone,
@@ -29,4 +23,4 @@ class Message(object):
 
 if __name__ == '__main__':
     message = Message(constants.API_KEY)
-    message.send_message("13037271505", "123456")
+    message.send_message("17600249517", "123456")

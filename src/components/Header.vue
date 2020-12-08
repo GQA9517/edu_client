@@ -5,22 +5,22 @@
         <div class="logo full-left">
           <router-link to="/"><img src="../static/image/logo.png" alt=""></router-link>
         </div>
-        <el-menu class="nav full-left">
-          <el-menu-item v-for="(banner, index) in nav_list" :key="index">
-            <el-link href="https://www.baidu.com">
+        <ul class="nav full-left">
+          <li v-for="(banner, index) in nav_list" :key="index">
+            <a :href="'#/course/'">
               {{ banner.title }}
-            </el-link>
-          </el-menu-item>
-        </el-menu>
+            </a>
+          </li>
+        </ul>
         <div class="login-bar full-right">
           <div class="shop-cart full-left">
             <img src="../static/image/cart.svg" alt="">
             <span><router-link to="/cart">购物车</router-link></span>
           </div>
           <div class="login-box full-left">
-            <span>登录</span>
+            <router-link to="/login">登录</router-link>
             |&nbsp;
-            <span>注册</span>
+            <router-link to="/register">注册</router-link>
           </div>
         </div>
       </div>

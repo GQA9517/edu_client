@@ -1,10 +1,12 @@
 import random
 
+from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status as http_status
+from rest_framework import status as http_status, status
 from rest_framework.generics import CreateAPIView
 from django_redis import get_redis_connection
+from rest_framework.viewsets import ModelViewSet
 
 from edu_api.libs.geetest import GeetestLib
 from edu_api.settings import constants
@@ -60,6 +62,41 @@ class UserAPIView(CreateAPIView):
     """用户注册"""
     queryset = UserInfo.objects.all()
     serializer_class = UserModelSerializer
+
+
+# class UserViewSet(ModelViewSet):
+#     def sign_in(self, request, *args, **kwargs):
+#         _ = self
+#         username = request.data.get('username')
+#         password = request.data.get('password')
+#         phone = request.data.get('phone')
+#         # print(username, password, 35)
+#         user = UserInfo.objects.filter(username=username, password=password,phone=phone)
+#         if user:
+#             return Response({
+#                 'message': '登录成功',
+#             }, status=status.HTTP_200_OK)
+#         else:
+#             return Response({
+#                 'message': '登录失败',
+#             }, status=status.HTTP_400_BAD_REQUEST)
+#
+#     def sign_up(self, request, *args, **kwargs):
+#         _ = self
+#         username = request.data.get('username')
+#         password = request.data.get('password')
+#         phone = request.data.get('phone')
+#         user = UserInfo.objects.filter(username=username,phone=phone)
+#         print(99,username, password,phone)
+#         if user:
+#             return Response({
+#                 'message': '用户名已存在',
+#             }, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#             UserInfo.objects.create(username=username, password=password, phone=phone)
+#             return Response({
+#                 'message': '注册成功'
+#             }, status=status.HTTP_200_OK)
 
 
 class SendMessageAPIView(APIView):

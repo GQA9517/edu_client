@@ -43,7 +43,7 @@ class UserModelSerializer(ModelSerializer):
         if not re.match(r'^1[3-9]\d{9}$', phone):
             raise serializers.ValidationError("手机号不符合格式")
 
-        # 验证密码
+        # 验证密码  最少8位 两到三种字符
         if len(password) < 8 or len(password) > 16:
             raise serializers.ValidationError("密码必须保持在8-16位字符长度之间!")
         # 验证手机号是否已存在
@@ -69,7 +69,7 @@ class UserModelSerializer(ModelSerializer):
         hash_pwd = make_password(password)
         print(hash_pwd)
 
-        # 处理用户名 设置默认值 随机生成字符串 手机号
+        # 处理用户名  设置默认值  随机生成字符串  手机号
         phone = validated_data.get("phone")
 
         # 为用户添加数据
