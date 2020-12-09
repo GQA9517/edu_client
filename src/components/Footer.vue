@@ -2,9 +2,7 @@
   <div class="footer">
     <ul>
       <li v-for="(banner, index) in nav_list" :key="index">
-        <el-link href="https://www.baidu.com">
-          {{ banner.title }}
-        </el-link>
+        <p @click="go(index)">{{ banner.title }}</p>
       </li>
     </ul>
   </div>
@@ -30,16 +28,20 @@ export default {
             list1.push(res.data[i])
           }
         }
-        this.nav_list = list1;
-        console.log(32, res.data)
+        this.home_list = list1;
+        console.log(res.data)
       }).catch(error => {
         console.log(error);
       })
+    },
+    go(index){
+      location.href=this.home_list[index].link
     },
   },
   created() {
     this.get_all_banner()
   },
+
 }
 </script>
 

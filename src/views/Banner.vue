@@ -1,7 +1,7 @@
 <template>
   <el-carousel height="720px" :interval="3000" arrow="always">
     <el-carousel-item v-for="(banner, index) in banner_list" :key="index">
-      <img :src="banner.img" alt="">
+      <img :src="banner.img" alt="" @click="go(index)">
     </el-carousel-item>
   </el-carousel>
 </template>
@@ -29,6 +29,9 @@ export default {
   },
   created() {
     this.get_all_banner()
+  },
+  go(index){
+    location.href=this.banner_list[index].link
   },
 }
 </script>

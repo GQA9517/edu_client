@@ -6,20 +6,29 @@
           <router-link to="/"><img src="../static/image/logo.png" alt=""></router-link>
         </div>
         <ul class="nav full-left">
-          <li v-for="(banner, index) in nav_list" :key="index">
-            <a :href="'#/course/'">
-              {{ banner.title }}
-            </a>
+          <li v-for="(banner, index) in nav_list" :key="index" >
+            <p @click="goto(index)">{{ banner.title }}</p>
           </li>
         </ul>
-        <div class="login-bar full-right">
+        <div class="login-bar full-right" v-if="LoginInfo.islogin">
+          <div class="shop-cart full-left">
+            <img src="../static/image/cart.svg" alt="">
+            <span><router-link to="/cart">购物车</router-link></span>
+          </div>
+          <div class="login-box full-left">
+            <span>欢迎{{LoginInfo.name}}登录</span>
+            &nbsp;|&nbsp;
+            <span @click="zhuxiao">注销账号</span>
+          </div>
+        </div>
+        <div class="login-bar full-right" v-else>
           <div class="shop-cart full-left">
             <img src="../static/image/cart.svg" alt="">
             <span><router-link to="/cart">购物车</router-link></span>
           </div>
           <div class="login-box full-left">
             <router-link to="/login">登录</router-link>
-            |&nbsp;
+            &nbsp;|&nbsp;
             <router-link to="/register">注册</router-link>
           </div>
         </div>
@@ -34,6 +43,11 @@ export default {
   data() {
     return {
       nav_list: [],
+      LoginInfo:{
+        name:'',
+        islogin:false,
+        remember_me:false,
+      }
     }
   },
   methods: {
@@ -42,21 +56,39 @@ export default {
         url: this.$settings.HOST + "home/nav/",
         method: 'get',
       }).then(res => {
-        let list1 = []
+        let list1=[]
         for (let i = 0; i < res.data.length; i++) {
           if (res.data[i].is_position===1){
             list1.push(res.data[i])
           }
         }
-        this.nav_list = list1
-        console.log(52, res.data)
+        this.home_list = list1;
+        console.log(res.data)
       }).catch(error => {
         console.log(error);
       })
     },
+    goto(index){
+      location.href=this.home_list[index].link
+    },
+    zhuxiao(){
+      let LoginInfo1={
+        name:'',
+        islogin:false,
+        remember_me:'',
+      }
+      localStorage.setItem('LoginInfo',LoginInfo1)
+      this.$router.push("/home")
+    },
   },
   created() {
     this.get_all_banner()
+    if(localStorage.getItem('LoginInfo')){
+      let Info=JSON.parse(localStorage.getItem('LoginInfo'))
+      this.LoginInfo=Info
+      console.log(Info)
+      console.log(this.LoginInfo.islogin)
+    }
   },
 }
 </script>

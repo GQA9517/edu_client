@@ -9,7 +9,8 @@
           <input v-model="password" type="password" placeholder="登录密码" class="user">
           <div id="geetest"></div>
           <div class="sms-box">
-            <input v-model="sms_code" type="text" maxlength="6" placeholder="输入验证码" class="user">
+            <input v-model="sms_code" type="text" maxlength="6"
+                   placeholder="输入验证码" class="user"  onkeyup="value=value.replace(/[^\d\*]/g,'')" >
             <div class="sms-btn" @click="get_code">获取验证码</div>
           </div>
           <button class="register_btn" @click="user_register">注册</button>
@@ -25,77 +26,123 @@
 <script>
 export default {
   name: "Register",
-  data() {
-    return {
-      phone: "",
-      password: "",
+  data(){
+    return{
+      phone:'',
+      password:'',
       sms_code: "",
       register_flag: false,
+      stop:true,
+      phone_code:'111111111'
+
     }
   },
-  methods: {
-    // 用户注册
-    user_register() {
-      this.$axios({
-        url: this.$settings.HOST + "user/users/",
-        method: 'post',
-        data: {
-          phone: this.phone,
-          password: this.password,
-          sms_code: this.sms_code
-        }
-      }).then(res => {
-        console.log(res.data);
-        // 保存用户信息  自动登录
-
-        let self = this;
-        this.$alert("注册成功", "百知教育", {
-          callback() {
-            self.$router.push("/")
+  methods:{
+    // 注册账号
+    user_register(){
+      this.check_phone()
+      console.log(1,parseInt(this.sms_code))
+      console.log(2,this.phone_code)
+      if(this.phone_code===parseInt(this.sms_code)){
+        this.stop=false
+      }
+      else{
+        this.stop=true
+        alert('验证码错误')
+      }
+      if(this.stop===false){
+        console.log(this.phone,
+            this.password,
+            this.sms_code,)
+        this.$axios({
+          url:this.$settings.HOST+'user/regis/',
+          method:'post',
+          data:{
+            phone:this.phone,
+            password:this.password,
+            sms_code:this.sms_code,
           }
+        }).then(res=>{
+          //注册成功
+          this.$axios({
+            url:this.$settings.HOST+'user/dele/',
+            method:'delete',
+            data:{
+              phone:this.phone,
+            }
+          })
+          console.log(res.data);
+          this.$router.push("/login")
+        }).catch(error=>{
+          //注册失败
+          console.log(error);
+
         })
-      }).catch(error => {
-        console.log(error);
-      })
+      }
     },
+
     // 检查手机号是否唯一
     check_phone() {
-      this.$axios.get(`${this.$settings.HOST}/user/message/${this.message}/`).catch(error=>{
-        this.$message.error(error.response.data.message);
-      });
+      let phone_rule=/^1(3[0-9]|4[01456879]|5[0-3,5-9]|6[2567]|7[0-8]|8[0-9]|9[0-3,5-9])\d{8}$/
+      let pwd_rule=/^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)(?!([^(0-9a-zA-Z)])+$).{8,20}$/
+      if(this.phone===''){
+        alert('手机号不能为空')
+        this.stop=true
+        return 0
+      }
+      else if(!phone_rule.test(this.phone)){
+        alert('手机号格式不正确')
+        this.stop=true
+      }
+      else if(!pwd_rule.test(this.password)){
+        alert('密码格式不正确')
+        this.stop=true
+      }
+      else{
+        this.stop=false
+        // 格式正确不为空则发起验证
+        this.$axios({
+          url: this.$settings.HOST + "user/ifunique/",
+          method: 'get',
+          params: {
+            phone: this.phone
+          },
+        }).then(res => {
+          console.log(res.data);
+          if(res.data===1){
+            alert('手机号已被注册')
+            this.stop=true
+            return 0
+          }else{
+            this.stop=false
+          }
+        }).catch(error => {
+          console.log(error);
+          alert(error)
+        })
+      }
+      console.log(this.phone);
     },
 
-    // 根据合法的手机号去发送验证码
     get_code() {
-      this.$axios({
-        url: this.$settings.HOST + "user/message/",
-        method: 'get',
-        params: {
-          phone: this.phone
-        }
-      }).then(res => {
-        let interval_time = 60; // 发送短信的间隔
-        if (this.flag === false) {
-          let t = setInterval(() => {
-            if (interval_time <= 1) {
-              clearInterval(t);
-              this.sms_code = '点击发送短信';
-              this.flag = false;
-            } else {
-              this.is_send_sms = false;
-              this.sms_code = `${interval_time}秒重新发送`;
-              interval_time--
-            }
-          }, 1000);
-          this.flag = true;
-        } else {
-          return false
-        }
-      }).catch(error => {
-        this.$message.error(error.response.data.msg)
-      })
+      this.check_phone()
+      if(this.stop===false){
+        this.$axios({
+          url: this.$settings.HOST + "user/message/",
+          method: 'get',
+          params: {
+            phone: this.phone
+          }
+        }).then(res => {
+          console.log(res.data);
+          this.phone_code=res.data.code
+          console.log(this.phone_code);
+        }).catch(error => {
+          console.log(error);
+        })
+      }
     },
-  }
+  },
 }
 </script>
 

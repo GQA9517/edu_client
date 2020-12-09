@@ -6,8 +6,8 @@
       <div class="condition">
         <ul class="cate-list">
           <li class="title">课程分类:</li>
-          <li @click="category=0" :class="category===0?'this':''">全部</li>
-          <li @click="category=cate.id" :class="category===cate.id?'this':''" v-for="(cate, index) in category_list"
+          <li @click="category=0" :class="category==0?'this':''">全部</li>
+          <li @click="category=cate.id" :class="category==cate.id?'this':''" v-for="(cate, index) in category_list"
               :key="index">{{ cate.name }}
           </li>
         </ul>
@@ -19,21 +19,24 @@
             <li class="hot" @click="change_order_type('students')" :class="change_order_class('students')">人气</li>
             <li class="price" @click="change_order_type('price')" :class="change_order_class('price')">价格</li>
           </ul>
-          <p class="condition-result">共21个课程</p>
+          <p class="condition-result">共{{ total }}个课程</p>
         </div>
 
       </div>
       <!-- 课程列表 -->
       <div class="course-list">
         <div class="course-item" v-for="(course, index) in course_list" :key="index">
-          <div class="course-image">
+          <div class="course-image" @click="go(course.id)">
             <img :src="course.course_img" alt="">
+
           </div>
           <div class="course-info">
             <h3>{{ course.name }} <span><img src="../static/image/avatar1.svg" alt="">{{ course.students }}人已加入学习</span>
             </h3>
             <p class="teather-info">huxz 百知教育教学总监
-              <span>共{{course.lessons}}课时/{{ course.lessons === course.pub_lessons ? '更新完成' : `已更新${course.pub_lessons}` }}</span>
+              <span>共{{
+                  course.lessons
+                }}课时/{{ course.lessons == course.pub_lessons ? '更新完成' : `已更新${course.pub_lessons}` }}</span>
             </p>
             <ul class="lesson-list">
               <li v-for="(lesson, key) in course.lesson_list" :key="key"><span
@@ -67,7 +70,6 @@
 
 <script>
 
-
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -83,7 +85,7 @@ export default {
         type: "id", // 排序类型默认值
         orders: "desc",   // 排序类型  desc 降序 asc升序
         page: 1, // 分页的页码
-        size: 2, // 每页展示的数量
+        size: 5, // 每页展示的数量
       }
     }
   },
@@ -95,7 +97,6 @@ export default {
     },
   },
   methods: {
-
     // 改变分页
     change_page(page) {
       this.filters.page = page;
@@ -106,8 +107,8 @@ export default {
       this.filters.size = size;
       this.filters.page = 1;
       this.get_all_course();
-    },
 
+    },
     // 改变排序的条件
     change_order_type(type) {
       // 通过click事件改变排序条件
@@ -167,7 +168,12 @@ export default {
         this.course_list = res.data.results;
         // 分页的总数量
         this.total = res.data.count;
+
       })
+    },
+
+    go(id) {
+      this.$router.push("/detail/" + id + '/')
     },
   },
   created() {
