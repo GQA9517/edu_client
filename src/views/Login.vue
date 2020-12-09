@@ -11,7 +11,7 @@
           <span>密码登录</span>
           <span>短信登录</span>
         </div>
-        <div class="inp" v-if="false">
+        <div class="inp" v-if="false" :model="ruleForm" :rules="rules" ref="ruleForm">
           <input type="text" placeholder="用户名 / 手机号码 / 邮箱" class="user" v-model="username">
           <input type="password" name="" class="pwd" placeholder="密码" v-model="password">
           <div id="geetest1"></div>
@@ -24,7 +24,7 @@
           </div>
           <button class="login_btn btn btn-primary" @click="get_captcha">登录</button>
           <p class="go_login">没有账号
-            <router-link to="register/">立即注册</router-link>
+            <router-link to="/register">立即注册</router-link>
           </p>
         </div>
         <div class="inp" v-show="true">
@@ -33,7 +33,7 @@
           <button id="get_code" class="btn btn-primary">获取验证码</button>
           <button class="login_btn">登录</button>
           <span class="go_login">没有账号
-            <router-link to="register/">立即注册</router-link>
+            <router-link to="/register">立即注册</router-link>
           </span>
         </div>
       </div>
@@ -47,10 +47,21 @@ export default {
   name: "Login",
   data() {
     return {
-      username: "",
-      password: "",
-      remember_me: true,
-      login_type: 0,
+      ruleForm: {
+        username: "",
+        password: "",
+        remember_me: true,
+        login_type: 0,
+      },
+      rules: {
+        username: [
+          {required: true, message: '请输入用户名', trigger: 'blur'},
+          {min: 2, max: 10, message: '长度在 3 到 5 个字符', trigger: 'blur'}
+        ],
+        password: [
+          {required: true, message: '请输入密码', trigger: 'blur'},
+        ],
+      }
     }
   },
   created() {
