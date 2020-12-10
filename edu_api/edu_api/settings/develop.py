@@ -48,10 +48,14 @@ INSTALLED_APPS = [
     'xadmin',
     'crispy_forms',
     'reversion',
+    # 富文本配置
+    'ckeditor',  # 富文本编辑器
+    'ckeditor_uploader',  # 富文本编辑器上传图片模块
 
     'home',
     'user',
-    'course'
+    'course',
+    'cart'
 ]
 
 MIDDLEWARE = [
@@ -230,6 +234,26 @@ AUTHENTICATION_BACKENDS = [
     'user.service.UserAuthentication',
 ]
 
+# 富文本编辑器
+CKEDITOR_UPLOAD_PATH = ''  # 使用fdfs分布系统
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',  # 完整工具条
+        'height': 300,  # 编辑高度
+        'width': 1000
+    },
+    # 'default': {
+    #     'toolbar': 'Custom',
+    #     'toolbar_Custom': [
+    #         ['Bold', 'Italic', 'Underline'],
+    #         ['NumberedList', 'BulletedList', '-', 'table', 'image2', 'Outdent', 'Indent',
+    #          '-', 'JustifyLeft', 'JustifyCenter',
+    #          'JustifyRight', 'JustifyBlock'],
+    #         ['Link', 'Unlink'],
+    #         ['RemoveFormat', 'Source']
+    #     ]
+    # }
+}
 
 # # redis相关配置
 # CACHES = {

@@ -28,14 +28,14 @@ export default {
             list1.push(res.data[i])
           }
         }
-        this.home_list = list1;
+        this.nav_list = list1;
         console.log(res.data)
       }).catch(error => {
         console.log(error);
       })
     },
     go(index){
-      location.href=this.home_list[index].link
+      location.href=this.nav_list[index].link
     },
   },
   created() {

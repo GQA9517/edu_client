@@ -13,9 +13,7 @@
         <div class="wrap-right">
           <h3 class="course-name">{{ course.name }}</h3>
           <p class="data">
-            {{ course.students }}人在学&nbsp;&nbsp;&nbsp;&nbsp;课程总时长：{{ course.pub_lessons }}课时/{{ course.lessons }}小时&nbsp;&nbsp;&nbsp;&nbsp;难度：{{
-              course.level_name
-            }}</p>
+            {{ course.students }}人在学&nbsp;&nbsp;&nbsp;&nbsp;课程总时长：{{ course.pub_lessons }}课时/{{ course.lessons }}小时&nbsp;&nbsp;&nbsp;&nbsp;难度：{{  course.level_message }}</p>
           <div class="sale-time">
             <p class="sale-type">限时免费</p>
             <p class="expire">距离结束：仅剩 110天 13小时 33分 <span class="second">08</span> 秒</p>
@@ -30,7 +28,8 @@
               <button class="buy-now">立即购买</button>
               <button class="free">免费试学</button>
             </div>
-            <div class="add-cart"><img src="../static/image/cart.svg" alt="">加入购物车</div>
+            <div class="add-cart"><img src="../static/image/cart.svg" alt="">
+              <span @click="add_cart">加入购物车</span></div>
           </div>
         </div>
       </div>
@@ -58,7 +57,6 @@
               <p class="chapter-title"><img src="../static/image/avatar1.svg" alt="">第{{
                   course_chapter.chapter
                 }}章·{{ course_chapter.name }}</p>
-              <!--                <p class="chapter-title">< img src="../static/image/avatar1.svg" alt="">第{{ course_chapter.chapter }}章·{{ course_chapter.name }}</p >-->
               <ul class="lesson-list" v-for="(lesson,key) in lesson_list" :key="key">
                 <li class="lesson-item" v-if="course_chapter.name === lesson.chapter">
                   <p class="name">
@@ -70,19 +68,22 @@
                 </li>
               </ul>
             </div>
+
+
 <!--            <div class="chapter-item" v-for="(course1,index) in course_chapter_list " :key="index">-->
 <!--              <p class="chapter-title"><img src="../static/image/avatar1.svg" alt="">第{{ course1.chapter }}章·{{ course1.name }}</p>-->
 <!--              <ul class="lesson-list" v-for="(course2,index2) in lesson_list " :key="index2">-->
 <!--                <li class="lesson-item" v-if="course1.name=course2.chapter">-->
 <!--                  {{ course1.name }}{{ course2.chapter }}-->
-<!--                  <p class="name"><span class="index">{{ course1.chapter }}-{{ index2 + 1 }}</span> {{course2.name}}-->
-<!--                    <span class="free">免费</span>-->
+<!--                  <p class="name"><span class="index">{{ course1.chapter }}-{{ index2 + 1 }}</span> {{course2.name}}<span-->
+<!--                      class="free">免费</span>-->
 <!--                  </p>-->
 <!--                  <p class="time">{{course2.duration}} <img src="../static/image/chapter-player.svg"></p>-->
 <!--                  <button class="try">立即试学</button>-->
 <!--                </li>-->
 <!--              </ul>-->
 <!--            </div>-->
+
 
 <!--            <div class="chapter-item">-->
 <!--              <p class="chapter-title"><img src="../static/image/12.png" alt="">第2章·Vue发展过程</p>-->
@@ -129,11 +130,17 @@
 </template>
 
 <script>
-
 import {videoPlayer} from 'vue-video-player'
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default {
   name: "CourseDetail",
+  components: {
+    videoPlayer,
+    Header,
+    Footer
+  },
   data() {
     return {
       id: 0,
@@ -143,12 +150,11 @@ export default {
       },
       course_chapter_list: {},
       lesson_list: {},
-      // 播放视频的配置
       playerOptions: {
         playbackRates: [0.7, 1.0, 1.5, 2.0], // 播放速度
         autoplay: false, //如果true,则自动播放
         muted: false, // 默认情况下将会消除任何音频。
-        loop: false, // 循环播放
+        loop: true, // 循环播放
         preload: 'auto',  // 建议浏览器在<video>加载元素后是否应该开始下载视频数据。auto浏览器选择最佳行为,立即开始加载视频（如果浏览器支持）
         language: 'zh-CN',
         aspectRatio: '16:9', // 将播放器置于流畅模式，并在计算播放器的动态大小时使用该值。值应该代表一个比例 - 用冒号分隔的两个数字（例如"16:9"或"4:3"）
@@ -171,6 +177,7 @@ export default {
     this.get_one_course()
   },
   methods: {
+    // 获取课程ID
     get_id() {
       let id = this.$route.params.id
       console.log(id);
@@ -186,7 +193,7 @@ export default {
       }
     },
 
-
+    // 获取课程信息
     get_one_course() {
       this.$axios({
         url: this.$settings.HOST + "course/course/" + this.id + '/',
@@ -198,9 +205,44 @@ export default {
         this.course_chapter_list = res.data.course_chapter_list
         this.lesson_list = res.data.lesson_list
         console.log(res.data);
-        console.log(1, res.data.course_chapter_list);
-        console.log(2, res.data.lesson_list);
+        console.log(res.data.course_chapter_list);
+        console.log(res.data.lesson_list);
 
+      }).catch(error => {
+        console.log(error);
+      })
+    },
+
+    // 检查是否登录
+    check_user_login() {
+      let token = localStorage.token || sessionStorage.token;
+      if (!token) {
+        let self = this;
+        this.$confirm("请先登录后再添加购物车", {
+          callback() {
+            self.$router.push("/login")
+          },
+        });
+        return false
+      }
+      return token;
+    },
+
+    // 添加购物车
+    add_cart() {
+      let token = this.check_user_login();
+      // 发起请求添加购物车
+      this.$axios.post(this.$settings.HOST + "cart/option/", {
+        course_id: this.id,
+      }, {
+        headers: {
+          // 必须请求头中携带token "jwt token值"
+          "Authorization": "jwt " + token,
+        }
+      }).then(res => {
+        this.$message.success(res.data.message);
+        // 向状态机提交动作来修改商品的总数
+        this.$store.commit("add_cart", res.data.cart_length)
       }).catch(error => {
         console.log(error);
       })

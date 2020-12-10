@@ -41,8 +41,8 @@ export default {
     // 注册账号
     user_register(){
       this.check_phone()
-      console.log(1,parseInt(this.sms_code))
-      console.log(2,this.phone_code)
+      console.log(parseInt(this.sms_code))
+      console.log(this.phone_code)
       if(this.phone_code===parseInt(this.sms_code)){
         this.stop=false
       }
@@ -55,7 +55,7 @@ export default {
             this.password,
             this.sms_code,)
         this.$axios({
-          url:this.$settings.HOST+'user/regis/',
+          url:this.$settings.HOST+'user/register/',
           method:'post',
           data:{
             phone:this.phone,
@@ -76,7 +76,6 @@ export default {
         }).catch(error=>{
           //注册失败
           console.log(error);
-
         })
       }
     },

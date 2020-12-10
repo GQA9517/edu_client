@@ -1,8 +1,10 @@
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 
 # Create your models here.
 from django.db import models
 
+from edu_api.settings.constants import IMG_SRC
 from home.models import BaseModel
 
 
@@ -44,7 +46,7 @@ class Course(BaseModel):
     course_img = models.ImageField(upload_to="course", max_length=255, verbose_name="封面图片", blank=True, null=True)
     course_type = models.SmallIntegerField(choices=course_type, default=0, verbose_name="付费类型")
     # 使用这个字段的原因
-    brief = models.TextField(max_length=2048, verbose_name="详情介绍", null=True, blank=True)
+    brief = RichTextUploadingField(max_length=2048, verbose_name="详情介绍", null=True, blank=True)
     level = models.SmallIntegerField(choices=level_choices, default=1, verbose_name="难度等级")
     pub_date = models.DateField(verbose_name="发布日期", auto_now_add=True)
     period = models.IntegerField(verbose_name="建议学习周期(day)", default=7)
@@ -68,8 +70,45 @@ class Course(BaseModel):
                 "id": lesson.id,
                 "name": lesson.name,
                 "free_trail": lesson.free_trail,
+                "duration": lesson.duration,
+                "section_type": lesson.section_type,
+                "chapter": lesson.chapter.name,
             })
         return data_list
+
+    @property
+    def level_message(self):
+        return self.level_choices[self.level][1]
+
+    @property
+    def course_chapter_list(self):
+        course_chapter_list = CourseChapter.objects.filter(is_show=True, is_delete=False, course_id=self.id).all()
+        data_list = []
+        if course_chapter_list is []:
+            return data_list
+        else:
+            for course_chapter in course_chapter_list:
+                data_list.append({
+                    "id": course_chapter.id,
+                    "course": course_chapter.course.name,
+                    "chapter": course_chapter.chapter,
+                    "name": course_chapter.name,
+                    "summary": course_chapter.summary,
+                    "pub_date": course_chapter.pub_date,
+                })
+            return data_list
+
+    @property
+    def brief_html(self):
+        # 返回富文本编辑器中图片的全路径
+        brief = self.brief.replace('src="/media', 'src="%s/media' % IMG_SRC)
+
+        return brief
+
+    @property
+    def get_file_path(self):
+        file_path = IMG_SRC + "/media/%s" % self.file_path
+        return file_path
 
     class Meta:
         db_table = "bz_course"
@@ -98,6 +137,9 @@ class Teacher(BaseModel):
         db_table = "bz_teacher"
         verbose_name = "讲师导师"
         verbose_name_plural = "讲师导师"
+
+    def role_name(self):
+        return self.role_choices[self.role][1]
 
     def __str__(self):
         return "%s" % self.name
@@ -148,3 +190,14 @@ class CourseLesson(BaseModel):
 
     def __str__(self):
         return "%s-%s" % (self.chapter, self.name)
+
+class LeaveMessage(BaseModel):
+    """留言板"""
+    phone = models.CharField(max_length=11,verbose_name='用户手机号')
+    textarea = models.TextField(max_length=256,verbose_name='用户留言内容')
+    course_id = models.CharField(max_length=80, verbose_name='课程id')
+
+    class Meta:
+        db_table = "bz_leave_message"
+        verbose_name = "留言板"
+        verbose_name_plural = verbose_name

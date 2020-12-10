@@ -6,8 +6,8 @@
       <div class="condition">
         <ul class="cate-list">
           <li class="title">课程分类:</li>
-          <li @click="category=0" :class="category==0?'this':''">全部</li>
-          <li @click="category=cate.id" :class="category==cate.id?'this':''" v-for="(cate, index) in category_list"
+          <li @click="category=0" :class="category===0?'this':''">全部</li>
+          <li @click="category=cate.id" :class="category===cate.id?'this':''" v-for="(cate, index) in category_list"
               :key="index">{{ cate.name }}
           </li>
         </ul>
@@ -36,7 +36,7 @@
             <p class="teather-info">huxz 百知教育教学总监
               <span>共{{
                   course.lessons
-                }}课时/{{ course.lessons == course.pub_lessons ? '更新完成' : `已更新${course.pub_lessons}` }}</span>
+                }}课时/{{ course.lessons === course.pub_lessons ? '更新完成' : `已更新${course.pub_lessons}` }}</span>
             </p>
             <ul class="lesson-list">
               <li v-for="(lesson, key) in course.lesson_list" :key="key"><span
@@ -142,7 +142,6 @@ export default {
     },
     // 获取所有的课程信息
     get_all_course() {
-
       let filters = {
         // 切换分页后的页面
         page: this.filters.page,
@@ -168,10 +167,8 @@ export default {
         this.course_list = res.data.results;
         // 分页的总数量
         this.total = res.data.count;
-
       })
     },
-
     go(id) {
       this.$router.push("/detail/" + id + '/')
     },
