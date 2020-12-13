@@ -1,7 +1,7 @@
 import xadmin
 
 from course.models import CourseCategory, Course, Teacher, CourseChapter, CourseLesson
-
+from course import models
 
 class CourseCategoryAdmin(object):
     """课程分类表"""
@@ -41,3 +41,43 @@ class CourseLessonAdmin(object):
 
 
 xadmin.site.register(CourseLesson, CourseLessonAdmin)
+
+
+class CourseDiscountAdmin(object):
+    """课程折扣模型"""
+    pass
+
+
+xadmin.site.register(models.CourseDiscount)
+
+
+class CourseDiscountTypeAdmin(object):
+    """课程优惠类型模型"""
+    pass
+
+
+xadmin.site.register(models.CourseDiscountType, CourseDiscountTypeAdmin)
+
+
+class ActivityAdmin(object):
+    """课程优惠时间表"""
+    pass
+
+
+xadmin.site.register(models.Activity, ActivityAdmin)
+
+
+class CoursePriceDiscountAdmin(object):
+    """课程与价格策略关系表"""
+    pass
+
+
+xadmin.site.register(models.CoursePriceDiscount, CoursePriceDiscountAdmin)
+
+
+class CourseExpireAdmin(object):
+    """课程与价格策略关系表"""
+    pass
+
+
+xadmin.site.register(models.CourseExpire, CourseExpireAdmin)

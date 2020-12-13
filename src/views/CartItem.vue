@@ -10,10 +10,9 @@
       </div>
       <div class="cart_column column_3">
         <el-select v-model="expire" size="mini" placeholder="请选择购买有效期" class="my_el_select">
-          <el-option label="1个月有效" value="30" key="30"></el-option>
-          <el-option label="2个月有效" value="60" key="60"></el-option>
-          <el-option label="3个月有效" value="90" key="90"></el-option>
-          <el-option label="永久有效" value="10000" key="10000"></el-option>
+          <el-option :label="item.expire_text" :value="item.id"
+                     v-for="(item, index) in course.expire_list" :key="index">
+          </el-option>
         </el-select>
       </div>
       <div class="cart_column column_4">¥{{ course.price }}</div>

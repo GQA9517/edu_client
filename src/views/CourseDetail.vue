@@ -15,12 +15,16 @@
           <p class="data">
             {{ course.students }}人在学&nbsp;&nbsp;&nbsp;&nbsp;课程总时长：{{ course.pub_lessons }}课时/{{ course.lessons }}小时&nbsp;&nbsp;&nbsp;&nbsp;难度：{{  course.level_message }}</p>
           <div class="sale-time">
-            <p class="sale-type">限时免费</p>
-            <p class="expire">距离结束：仅剩 110天 13小时 33分 <span class="second">08</span> 秒</p>
+            <p class="sale-type">{{ course.discount_name }}</p>
+            <p class="expire">距离结束：仅剩 {{ parseInt(course.active_time / (24 * 3600)) }}天
+              {{ parseInt(course.active_time / 3600 % 24) }}小时
+              {{ parseInt(course.active_time / 60 % 60) }}分
+              <span class="second">{{ parseInt(course.active_time % 60) }}</span> 秒
+            </p>
           </div>
           <p class="course-price">
             <span>活动价</span>
-            <span class="discount">¥0.00</span>
+            <span class="discount">¥{{ course.discount_price }}</span>
             <span class="original">¥{{ course.price }}</span>
           </p>
           <div class="buy">
@@ -136,11 +140,6 @@ import Footer from "@/components/Footer";
 
 export default {
   name: "CourseDetail",
-  components: {
-    videoPlayer,
-    Header,
-    Footer
-  },
   data() {
     return {
       id: 0,
@@ -170,48 +169,7 @@ export default {
       },
     }
   },
-  created() {
-    // 获取当前id
-    this.get_id()
-    // 获取课程的详细信息
-    this.get_one_course()
-  },
   methods: {
-    // 获取课程ID
-    get_id() {
-      let id = this.$route.params.id
-      console.log(id);
-      if (id > 0) {
-        this.id = id
-      } else {
-        this.$alert("您所点击的页面不存在", "百知教育", {
-          callback() {
-            // 返回上一页
-            self.$router.go(-1);
-          }
-        })
-      }
-    },
-
-    // 获取课程信息
-    get_one_course() {
-      this.$axios({
-        url: this.$settings.HOST + "course/course/" + this.id + '/',
-        method: 'get',
-      }).then(res => {
-        this.course = res.data
-        this.playerOptions.poster = this.course.course_img
-        this.playerOptions.sources[0].src = this.course.file_path
-        this.course_chapter_list = res.data.course_chapter_list
-        this.lesson_list = res.data.lesson_list
-        console.log(res.data);
-        console.log(res.data.course_chapter_list);
-        console.log(res.data.lesson_list);
-
-      }).catch(error => {
-        console.log(error);
-      })
-    },
 
     // 检查是否登录
     check_user_login() {
@@ -247,6 +205,64 @@ export default {
         console.log(error);
       })
     },
+
+    // 获取课程id
+    get_id() {
+      let id = this.$route.params.id
+      console.log(id);
+      if (id > 0) {
+        this.id = id
+      } else {
+        this.$alert("您所点击的页面不存在", "百知教育", {
+          callback() {
+            // 返回上一页
+            self.$router.go(-1);
+          }
+        })
+      }
+    },
+
+    // 获取课程信息
+    get_one_course() {
+      this.$axios({
+        url: this.$settings.HOST + "course/detail/" + this.id + '/',
+        method: 'get',
+      }).then(res => {
+        this.course = res.data
+        this.playerOptions.poster = this.course.course_img
+        this.playerOptions.sources[0].src = this.course.file_path
+        this.course_chapter_list = res.data.course_chapter_list
+        this.lesson_list = res.data.lesson_list
+        console.log(res.data);
+        console.log(res.data.course_chapter_list);
+        console.log(res.data.lesson_list);
+
+        // 设置课程活动的倒计时
+        if (this.course.active_time > 0) {
+          let timer = setInterval(() => {
+            if (this.course.active_time > 1) {
+              this.course.active_time -= 1
+            } else {
+              clearInterval(timer)
+            }
+          }, 1000)
+        }
+
+      }).catch(error => {
+        console.log(error);
+      })
+    },
+  },
+  created() {
+    // 获取当前id
+    this.get_id()
+    // 获取课程的详细信息
+    this.get_one_course()
+  },
+  components: {
+    videoPlayer,
+    Header,
+    Footer
   }
 }
 </script>

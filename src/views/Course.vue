@@ -44,8 +44,8 @@
                   class="free" v-if="lesson.free_trail">免费</span></li>
             </ul>
             <div class="pay-box">
-              <span class="discount-type">限时免费</span>
-              <span class="discount-price">￥0.00元</span>
+              <span class="discount-type">{{ course.discount_name }}</span>
+              <span class="discount-price">￥{{ course.discount_price }}元</span>
               <span class="original-price">原价：{{ course.price }}元</span>
               <span class="buy-now">立即购买</span>
             </div>
@@ -85,7 +85,7 @@ export default {
         type: "id", // 排序类型默认值
         orders: "desc",   // 排序类型  desc 降序 asc升序
         page: 1, // 分页的页码
-        size: 5, // 每页展示的数量
+        size: 2, // 每页展示的数量
       }
     }
   },

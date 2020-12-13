@@ -27,7 +27,7 @@ class CourseModelSerializer(ModelSerializer):
     class Meta:
         model = Course
         fields = ("id", "name", "course_img", "students", "lessons", "pub_lessons",
-                  "price", "teacher", "lesson_list")
+                  "price", "teacher", "lesson_list", "discount_name", "discount_price")
 
 
 class CourseDetailModelSerializer(ModelSerializer):
@@ -39,7 +39,8 @@ class CourseDetailModelSerializer(ModelSerializer):
         model = Course
         fields = ("id", "name", "course_img", "students", "lessons", "pub_lessons",
                   "price", "teacher", "lesson_list", "course_category", "level_message",
-                  "course_chapter_list", "brief_html", "file_path")
+                  "course_chapter_list", "brief_html", "file_path",
+                  "discount_name", "discount_price", "active_time")
         # course_chapter_list  一级标题
         # lesson_list  二级标题
         extra_kwargs = {
