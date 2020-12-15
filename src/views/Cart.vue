@@ -15,7 +15,10 @@
           <span class="do_more">操作</span>
         </div>
         <div class="cart_course_list">
-          <CartItem v-for="(course, index) in cart_list" :course="course" :key="index"></CartItem>
+          <CartItem v-for="(course, index) in cart_list" :course="course" :key="index"
+                    @change_select="cart_total_price">
+
+          </CartItem>
         </div>
         <div class="cart_footer_row">
           <span class="cart_select"><label> <el-checkbox></el-checkbox><span>全选</span></label></span>
@@ -38,17 +41,31 @@ export default {
   name: "Cart",
   data() {
     return {
-      cart_list: [],
-
+      cart_list: [],      // 购物车列表
+      total_price: 0.00,  // 购物车总价
     }
   },
   methods: {
+
+    // 计算购物车商品总价
+    cart_total_price() {
+      let total = 0;
+      this.cart_list.forEach((course, key) => {
+        // 判断商品是否被选中  选中则计入总价
+        if (course.selected) {
+          total += parseFloat(course.price);
+        }
+        this.total_price = total;
+      })
+    },
+
     // 检查用户是否登录
     check_user_login() {
       let token = localStorage.token || sessionStorage.token;
       if (!token) {
         let self = this;
-        this.$confirm("请先登录后再添加购物车", {
+        this.$
+        confirm("请先登录后再添加购物车", {
           callback() {
             self.$router.push("/login")
           },

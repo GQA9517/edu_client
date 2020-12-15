@@ -40,7 +40,7 @@ class CaptchaAPIView(APIView):
     def post(self, request):
         """测试验证码"""
         gt = GeetestLib(pc_geetest_id, pc_geetest_key)
-        print(22, gt)
+        print(43,gt)
         challenge = request.data.get("geetest_challenge")
         validate = request.data.get("geetest_validate")
         seccode = request.data.get("geetest_seccode")
@@ -49,7 +49,7 @@ class CaptchaAPIView(APIView):
             result = gt.success_validate(challenge, validate, seccode, self.user_id)
         else:
             result = gt.failback_validate(challenge, validate, seccode)
-        print(11, result)
+        print(52, result)
         result = {"status": "success"} if result else {"status": "fail"}
         return Response(result)
 

@@ -6,6 +6,7 @@ import Register from "@/views/Register";
 import Course from "@/views/Course";
 import CourseDetail from "@/views/CourseDetail";
 import Cart from "@/views/Cart";
+import Order from "@/views/Order";
 
 Vue.use(VueRouter)
 
@@ -17,6 +18,7 @@ const routes = [
   {path: "/course", component: Course},
   {path: "/detail/:id", component: CourseDetail},
   {path: "/cart", component: Cart},
+  {path: "/order", component: Order},
 ]
 
 const router = new VueRouter({
