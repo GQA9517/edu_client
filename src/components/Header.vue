@@ -6,7 +6,9 @@
           <router-link to="/"><img src="../static/image/logo.png" alt=""></router-link>
         </div>
         <ul class="nav full-left">
-          <li v-for="(nav, index) in banner_list" :key="index"><router-link to="/course">{{ nav.title }}</router-link></li>
+          <li v-for="(nav, index) in banner_list" :key="index">
+            <router-link to="/course">{{ nav.title }}</router-link>
+          </li>
         </ul>
         <div class="login-bar full-right">
           <div class="shop-cart full-left">

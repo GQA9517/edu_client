@@ -16,7 +16,7 @@
         </div>
         <div class="cart_course_list">
           <CartItem v-for="(course, index) in cart_list" :course="course" :key="index"
-                    @change_select="cart_total_price" @expire="expire">
+                    @change_select="cart_total_price" @expire="expire" @deleteone="deleteone">
 
           </CartItem>
         </div>
@@ -47,6 +47,9 @@ export default {
   },
   methods: {
     expire:function(){
+      this.get_cart_list()
+    },
+    deleteone:function (){
       this.get_cart_list()
     },
 

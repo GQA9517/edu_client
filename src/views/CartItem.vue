@@ -75,6 +75,7 @@ export default {
         console.log(res);
         this.$message.success("删除成功！")
         this.is_show = false
+        this.$emit("deleteone")
       }).catch(error => {
         console.log(error);
       })
