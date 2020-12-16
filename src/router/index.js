@@ -7,6 +7,8 @@ import Course from "@/views/Course";
 import CourseDetail from "@/views/CourseDetail";
 import Cart from "@/views/Cart";
 import Order from "@/views/Order";
+import OrderSuccess from "@/views/OrderSuccess";
+import OrderList from "@/views/OrderList";
 
 Vue.use(VueRouter)
 
@@ -19,10 +21,13 @@ const routes = [
   {path: "/detail/:id", component: CourseDetail},
   {path: "/cart", component: Cart},
   {path: "/order", component: Order},
+  {path: "/result", component: OrderSuccess},
+  {path: "/list", component: OrderList},
 ]
 
 const router = new VueRouter({
-  routes
+  routes,
+  mode:'history',
 })
 
 export default router

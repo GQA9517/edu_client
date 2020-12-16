@@ -16,15 +16,15 @@
         </div>
         <div class="cart_course_list">
           <CartItem v-for="(course, index) in cart_list" :course="course" :key="index"
-                    @change_select="cart_total_price">
+                    @change_select="cart_total_price" @expire="expire">
 
           </CartItem>
         </div>
         <div class="cart_footer_row">
           <span class="cart_select"><label> <el-checkbox></el-checkbox><span>全选</span></label></span>
           <span class="cart_delete"><i class="el-icon-delete"></i> <span>删除</span></span>
-          <span class="goto_pay">去结算</span>
-          <span class="cart_total">总计：¥0.0</span>
+          <span class="goto_pay"><router-link to="order">去结算</router-link></span>
+          <span class="cart_total">总计：¥{{ total_price }}</span>
         </div>
       </div>
     </div>
@@ -46,6 +46,9 @@ export default {
     }
   },
   methods: {
+    expire:function(){
+      this.get_cart_list()
+    },
 
     // 计算购物车商品总价
     cart_total_price() {
@@ -62,10 +65,10 @@ export default {
     // 检查用户是否登录
     check_user_login() {
       let token = localStorage.token || sessionStorage.token;
+      console.log(68,token);
       if (!token) {
         let self = this;
-        this.$
-        confirm("请先登录后再添加购物车", {
+        this.$confirm("对不起，请您登录后再试", {
           callback() {
             self.$router.push("/login")
           },
@@ -84,13 +87,16 @@ export default {
             }
           }).then(res => {
         this.cart_list = res.data;
+        this.cart_total_price()
+        console.log(91, res.data)
       }).catch(error => {
         console.log(error);
       })
-    },
+    }
   },
   created() {
     this.get_cart_list()
+    this.cart_total_price()
   },
   components: {
     CartItem: CartItem,

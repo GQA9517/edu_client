@@ -2,7 +2,7 @@
   <div class="cart">
     <Header/>
     <div class="cart-info">
-      <h3 class="cart-top">购物车结算 <span>共1门课程</span></h3>
+      <h3 class="cart-top">购物车结算 <span>共{{course_list.length}}门课程</span></h3>
       <div class="cart-title">
         <el-row>
           <el-col :span="2">&nbsp;</el-col>
@@ -59,7 +59,7 @@ export default {
 
     // 发起生成的请求  订单生成成功后  支付
     pay_order() {
-      this.$axios.post(this.$settings.HOST + "order/option/", {
+      this.$axios.post(this.$settings.HOST + "order/orders/", {
         pay_type: this.pay_type
       }, {
         headers: {
@@ -68,18 +68,24 @@ export default {
       }).then(res => {
         console.log(res.data);
         this.$message.success("订单生成成功，即将跳转到支付页~");
-
-        // 如果订单生成成功，则自动跳转到支付页
-
+        //订单生成成功，自动跳转到支付宝支付
+        this.$axios.get(this.$settings.HOST+"payments/pay/",{
+          params:{
+            order_number:res.data.order_number,
+          }
+        }).then(res=>{
+          location.href=res.data;
+        }).catch(error=>{
+          this.$message.error(error.res)
+        })
 
       }).catch(error => {
         this.$message.error(error);
       })
     },
-
     // 获取所有选中的课程
     get_select_course() {
-      this.$axios.get(this.$settings.HOST + 'cart/order/', {
+      this.$axios.get(this.$settings.HOST + 'cart/cart_order/', {
         headers: {
           "Authorization": "jwt " + this.token,
         }

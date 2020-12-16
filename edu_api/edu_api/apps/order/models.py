@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 from course.models import Course
 from home.models import BaseModel
 from user.models import UserInfo

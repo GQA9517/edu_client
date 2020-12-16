@@ -1,22 +1,22 @@
 <template>
-  <div v-show="show">
-    <div class="cart_item">
+  <div class="cart_item" v-show="is_show">
       <div class="cart_column column_1">
-        <el-checkbox class="my_el_checkbox" v-model="course.selected"></el-checkbox>
+        <el-checkbox class="my_el_checkbox" v-model="course.selected" @change="select(course.selected)"></el-checkbox>
       </div>
       <div class="cart_column column_2">
         <img :src="course.course_img" alt="">
         <span><router-link :to="'/detail/'+course.id">{{ course.name }}</router-link></span>
       </div>
       <div class="cart_column column_3">
-        <el-select v-model="expire" size="mini" placeholder="请选择购买有效期" class="my_el_select">
+        <el-select v-model="course.expire_id" size="mini" placeholder="请选择购买有效期" class="my_el_select">
           <el-option :label="item.expire_text" :value="item.id"
                      v-for="(item, index) in course.expire_list" :key="index">
           </el-option>
         </el-select>
       </div>
       <div class="cart_column column_4">¥{{ course.price }}</div>
-      <div class="cart_column column_4"><button @click="delete_cart">删除</button></div>
+    <div class="cart_column column_4">
+      <el-button type="danger" @click="del_course">删除</el-button>
     </div>
   </div>
 </template>
@@ -28,67 +28,77 @@ export default {
     'course.selected': function () {
       // 后台发起请求改变状态
       this.change_select();
+    },
+    'course.expire_id': function () {
+      this.patch_course()
     }
   },
   data() {
     return {
       checked: 0,
-      expire: 0,
-      show:true
+      // expire: 0,
+      is_show: true
     }
   },
   methods: {
-    check_user_login() {
+    //改变选框
+    select:function (selected){
+      let token = sessionStorage.token
+      this.$axios({
+        method:'put',
+        url:this.$settings.HOST + 'cart/option/',
+        headers:{
+          "Authorization": "jwt "+ token
+        },
+        data:{course_id:this.course.id}
+      }).then(response=>{
+        console.log(response);
+        this.$emit('select',response.data.message)
+      }).catch(error=>{
+        console.log(error);
+      })
+    },
+    //删除
+    del_course() {
       let token = localStorage.token || sessionStorage.token;
-      if (!token) {
-        let self = this;
-        this.$confirm("请先登录后再添加购物车", {
-          callback() {
-            self.$router.push("/login")
-          },
-        });
-        return false
-      }
-      return token;
+      console.log(token);
+      this.$axios({
+        url: this.$settings.HOST + "cart/option/",
+        method: "delete",
+        headers: {
+          "Authorization": "jwt " + token,
+        },
+        data: {
+          course_id: this.course.id,
+        },
+      }).then(res => {
+        console.log(res);
+        this.$message.success("删除成功！")
+        this.is_show = false
+      }).catch(error => {
+        console.log(error);
+      })
+    },
+    //更新
+    patch_course() {
+      console.log(this.course.expire_id);
+      let token = localStorage.token || sessionStorage.token
+      this.$axios.patch(this.$settings.HOST + "cart/option/", {
+        course_id: this.course.id,
+        expire: this.course.expire_id
+      }, {
+        headers: {
+          "Authorization": "jwt " + token
+        },
+      }).then(res => {
+        this.$emit("expire", res.data.message)
+      }).catch(error => {
+        console.log(error);
+      })
     },
     change_select() {
-      let token = this.check_user_login();
-      this.$axios({
-        url: this.$settings.HOST + "cart/option/",
-        method: 'patch',
-        headers: {
-          // 必须请求头中携带token "jwt token值"
-          "Authorization": "jwt " + token,
-        },
-        data: {
-          selected:this.course.selected,
-          course_id:this.course.id
-        }
-      })
-      console.log(this.course.selected)
-    },
-    delete_cart() {
-      let token = this.check_user_login();
-      this.$axios({
-        url: this.$settings.HOST + "cart/option/",
-        method: 'delete',
-        headers: {
-          // 必须请求头中携带token "jwt token值"
-          "Authorization": "jwt " + token,
-        },
-        data: {
-          course_id:this.course.id
-        }
-      }).then(res=>{
-        console.log(res)
-        console.log(this.course)
-        this.show=false
-        this.$store.commit("delete_cart" )
-
-      }).catch(error=>{
-        console.log(error)
-      })
-    },
+      this.$message.success("更新成功")
+    }
   }
 }
 </script>

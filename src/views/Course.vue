@@ -19,19 +19,20 @@
             <li class="hot" @click="change_order_type('students')" :class="change_order_class('students')">人气</li>
             <li class="price" @click="change_order_type('price')" :class="change_order_class('price')">价格</li>
           </ul>
-          <p class="condition-result">共{{ total }}个课程</p>
+          <p class="condition-result">共23个课程</p>
         </div>
 
       </div>
       <!-- 课程列表 -->
       <div class="course-list">
         <div class="course-item" v-for="(course, index) in course_list" :key="index">
-          <div class="course-image" @click="go(course.id)">
+          <div class="course-image">
             <img :src="course.course_img" alt="">
-
           </div>
           <div class="course-info">
-            <h3>{{ course.name }} <span><img src="../static/image/avatar1.svg" alt="">{{ course.students }}人已加入学习</span>
+            <h3>
+              <router-link :to="'/detail/'+course.id">{{ course.name }}</router-link>
+              <span><img src="../static/image/avatar1.svg" alt="">{{ course.students }}人已加入学习</span>
             </h3>
             <p class="teather-info">huxz 百知教育教学总监
               <span>共{{
@@ -70,6 +71,7 @@
 
 <script>
 
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -97,6 +99,7 @@ export default {
     },
   },
   methods: {
+
     // 改变分页
     change_page(page) {
       this.filters.page = page;
@@ -107,8 +110,8 @@ export default {
       this.filters.size = size;
       this.filters.page = 1;
       this.get_all_course();
-
     },
+
     // 改变排序的条件
     change_order_type(type) {
       // 通过click事件改变排序条件
@@ -142,6 +145,7 @@ export default {
     },
     // 获取所有的课程信息
     get_all_course() {
+
       let filters = {
         // 切换分页后的页面
         page: this.filters.page,
@@ -168,9 +172,6 @@ export default {
         // 分页的总数量
         this.total = res.data.count;
       })
-    },
-    go(id) {
-      this.$router.push("/detail/" + id + '/')
     },
   },
   created() {

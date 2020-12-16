@@ -28,17 +28,17 @@ class OrderModelSerializer(ModelSerializer):
 
         return attrs
 
+    # 生成订单
     def create(self, validated_data):
-        """生成订单   订单详情"""
-
         redis_connection = get_redis_connection("cart")
 
-        # TODO 可以通过context传递request对象
+        # 可以通过context传递request对象
         user_id = self.context['request'].user.id
         incr = redis_connection.incr("number")
 
         # 生成唯一的订单号  时间戳  用户id   随机字符串
         order_number = datetime.now().strftime("%Y%m%d%H%M%S") + "%06d" % user_id + "%06d" % incr
+        print(order_number, 41)
 
         with transaction.atomic():
             # 事务事务回滚点
@@ -54,7 +54,7 @@ class OrderModelSerializer(ModelSerializer):
                 pay_type=validated_data.get("pay_type"),
                 credit=0,
                 coupon=0,
-                order_desc="选择这个课程是你极其明智的决定！！",
+                order_desc="选择这个课程是你明智之举~",
                 user_id=user_id,
             )
 
@@ -110,6 +110,5 @@ class OrderModelSerializer(ModelSerializer):
 
                 order.save()
 
-                # TODO 将订单生成成功后课程从购物车移除
-
+                #  将订单生成成功后课程从购物车移除
             return order

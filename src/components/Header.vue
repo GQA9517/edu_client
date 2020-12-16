@@ -6,30 +6,22 @@
           <router-link to="/"><img src="../static/image/logo.png" alt=""></router-link>
         </div>
         <ul class="nav full-left">
-          <li v-for="(banner, index) in nav_list" :key="index" >
-            <p @click="goto(index)">{{ banner.title }}</p>
-          </li>
+          <li v-for="(nav, index) in banner_list" :key="index"><router-link to="/course">{{ nav.title }}</router-link></li>
         </ul>
-        <div class="login-bar full-right" v-if="LoginInfo.islogin">
+        <div class="login-bar full-right">
           <div class="shop-cart full-left">
             <img src="../static/image/cart.svg" alt="">
-            <span><router-link to="/cart">购物车</router-link></span>
+            <span><router-link to="/cart">购物车{{this.$store.state.cart_length}}</router-link></span>
           </div>
-          <div class="login-box full-left">
-            <span>欢迎{{LoginInfo.name}}登录</span>
-            &nbsp;|&nbsp;
-            <span @click="zhuxiao">注销账号</span>
-          </div>
-        </div>
-        <div class="login-bar full-right" v-else>
-          <div class="shop-cart full-left">
-            <img src="../static/image/cart.svg" alt="">
-            <span><router-link to="/cart">购物车</router-link></span>
-          </div>
-          <div class="login-box full-left">
+          <div class="login-box full-left" v-if="token === false">
             <router-link to="/login">登录</router-link>
             &nbsp;|&nbsp;
             <router-link to="/register">注册</router-link>
+          </div>
+          <div class="login-box full-left" v-else>
+            <span><router-link to="/list">个人中心</router-link></span>
+            &nbsp;|&nbsp;
+            <span @click="loginOut">退出登录</span>
           </div>
         </div>
       </div>
@@ -42,54 +34,56 @@ export default {
   name: "Header",
   data() {
     return {
-      nav_list: [],
-      LoginInfo:{
-        name:'',
-        islogin:false,
-        remember_me:false,
-      }
+      banner_list: [],
+      token: false,
     }
   },
   methods: {
     get_all_banner() {
       this.$axios({
-        url: this.$settings.HOST + "home/nav/",
-        method: 'get',
+        url: this.$settings.HOST + "home/up_nav/",
+        method: "get",
       }).then(res => {
-        let list1=[]
-        for (let i = 0; i < res.data.length; i++) {
-          if (res.data[i].is_position===1){
-            list1.push(res.data[i])
-          }
-        }
-        this.nav_list = list1;
-        console.log(res.data)
+        this.banner_list = res.data;
+        console.log(this.banner_list)
       }).catch(error => {
-        console.log(error);
+        console.log(error)
       })
     },
-    zhuxiao(){
-      let LoginInfo1={
-        name:'',
-        islogin:false,
-        remember_me:'',
-      }
-      localStorage.setItem('LoginInfo',LoginInfo1)
-      this.$router.push("/home")
-    },
-    goto(index){
-      location.href=this.nav_list[index].link
+    loginOut(){
+      this.token = false
+      sessionStorage.removeItem("token")
+      localStorage.removeItem("token")
+      this.$message({
+        message: "退出登录成功",
+        type: 'success',
+        duration: 1000
+      })
     },
   },
   created() {
-    this.get_all_banner()
-    if(localStorage.getItem('LoginInfo')){
-      let Info=JSON.parse(localStorage.getItem('LoginInfo'))
-      this.LoginInfo=Info
-      console.log(Info)
-      console.log(this.LoginInfo.islogin)
+    this.get_all_banner();
+    let tokens = sessionStorage.getItem("token")
+    if(tokens){
+      this.token = true
+    }
+    let token = localStorage.getItem("token")
+    if(token){
+      this.$axios({
+        url: this.$settings.HOST + "user/token/",
+        method: 'post',
+        data: {
+          'token': token,
+        },
+      }).then(res =>{
+        console.log(res.data.token)
+        this.token = true
+      }).catch(error => {
+        console.log(error)
+      })
     }
   },
+
 }
 </script>
 

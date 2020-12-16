@@ -9,8 +9,7 @@
           <input v-model="password" type="password" placeholder="登录密码" class="user">
           <div id="geetest"></div>
           <div class="sms-box">
-            <input v-model="sms_code" type="text" maxlength="6"
-                   placeholder="输入验证码" class="user"  onkeyup="value=value.replace(/[^\d\*]/g,'')" >
+            <input v-model="sms_code" type="text" maxlength="6" placeholder="输入验证码" class="user">
             <div class="sms-btn" @click="get_code">获取验证码</div>
           </div>
           <button class="register_btn" @click="user_register">注册</button>
@@ -26,121 +25,95 @@
 <script>
 export default {
   name: "Register",
-  data(){
-    return{
-      phone:'',
-      password:'',
-      sms_code: "",
+  data() {
+    return {
+      phone: '',
+      password: '',
+      sms_code: '',
       register_flag: false,
-      stop:true,
-      phone_code:'111111111'
-
     }
   },
-  methods:{
-    // 注册账号
-    user_register(){
-      this.check_phone()
-      console.log(parseInt(this.sms_code))
-      console.log(this.phone_code)
-      if(this.phone_code===parseInt(this.sms_code)){
-        this.stop=false
-      }
-      else{
-        this.stop=true
-        alert('验证码错误')
-      }
-      if(this.stop===false){
-        console.log(this.phone,
-            this.password,
-            this.sms_code,)
+  methods: {
+    get_code() {
+      this.$axios({
+        url: this.$settings.HOST + 'user/message/',
+        method: 'get',
+        params: {
+          phone: this.phone
+        }
+      }).then(response => {
+        console.log(response)
+      }).catch(error => {
+        console.log(error)
+        this.$message({
+          message: "验证码错误",
+          type: 'success',
+          duration: 1000,
+        })
+      })
+    },
+
+    user_register: function () {
+      if (this.phone === '' || this.password === '' || this.sms_code === '') {
+        this.$message({
+          message: "账号或密码或验证码不能为空",
+          type: 'success',
+          duration: 1000,
+        })
+      } else if (this.register_flag) {
         this.$axios({
-          url:this.$settings.HOST+'user/register/',
-          method:'post',
-          data:{
-            phone:this.phone,
-            password:this.password,
-            sms_code:this.sms_code,
-          }
-        }).then(res=>{
-          //注册成功
-          this.$axios({
-            url:this.$settings.HOST+'user/dele/',
-            method:'delete',
-            data:{
-              phone:this.phone,
+          url: this.$settings.HOST + "user/users/",
+          method: "post",
+          data: {
+            phone: this.phone,
+            password: this.password,
+            sms_code:this.sms_code
+          },
+        }).then(res => {
+          console.log(res);
+          // 保存用户信息  自动登录
+          localStorage.setItem('username', this.username)
+          localStorage.setItem('password', this.password)
+          localStorage.setItem('phone', this.phone)
+          localStorage.setItem('token', res.data.token)
+          sessionStorage.setItem('token', res.data.token)
+          let self = this;
+          this.$alert("注册成功", "百知教育", {
+            callback() {
+              self.$router.push("/")
             }
           })
-          console.log(res.data);
-          this.$router.push("/login")
-        }).catch(error=>{
-          //注册失败
+        }).catch(error => {
           console.log(error);
+          this.$message({
+            message: '注册失败',
+            type: 'success',
+            duration: 1000,
+          })
         })
       }
     },
 
     // 检查手机号是否唯一
     check_phone() {
-      let phone_rule=/^1(3[0-9]|4[01456879]|5[0-3,5-9]|6[2567]|7[0-8]|8[0-9]|9[0-3,5-9])\d{8}$/
-      let pwd_rule=/^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)(?!([^(0-9a-zA-Z)])+$).{8,20}$/
-      if(this.phone===''){
-        alert('手机号不能为空')
-        this.stop=true
-        return 0
-      }
-      else if(!phone_rule.test(this.phone)){
-        alert('手机号格式不正确')
-        this.stop=true
-      }
-      else if(!pwd_rule.test(this.password)){
-        alert('密码格式不正确')
-        this.stop=true
-      }
-      else{
-        this.stop=false
-        // 格式正确不为空则发起验证
-        this.$axios({
-          url: this.$settings.HOST + "user/ifunique/",
-          method: 'get',
-          params: {
-            phone: this.phone
-          },
-        }).then(res => {
-          console.log(res.data);
-          if(res.data===1){
-            alert('手机号已被注册')
-            this.stop=true
-            return 0
-          }else{
-            this.stop=false
-          }
-        }).catch(error => {
-          console.log(error);
-          alert(error)
+      this.$axios({
+        url: this.$settings.HOST + "user/phone/",
+        method: 'post',
+        data: {
+          phone: this.phone
+        }
+      }).then(response => {
+        console.log(response)
+        this.register_flag = true
+      }).catch(onerror => {
+        this.$message({
+          message: "手机号已被注册",
+          type: 'success',
+          duration: 1000,
         })
-      }
-      console.log(this.phone);
-    },
+      })
+    }
 
-    get_code() {
-      this.check_phone()
-      if(this.stop===false){
-        this.$axios({
-          url: this.$settings.HOST + "user/message/",
-          method: 'get',
-          params: {
-            phone: this.phone
-          }
-        }).then(res => {
-          console.log(res.data);
-          this.phone_code=res.data.code
-          console.log(this.phone_code);
-        }).catch(error => {
-          console.log(error);
-        })
-      }
-    },
   },
 }
 </script>

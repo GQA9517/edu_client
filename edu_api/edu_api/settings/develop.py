@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'course',
     'cart',
     'order',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -75,8 +76,7 @@ ROOT_URLCONF = 'edu_api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        # 'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -202,7 +202,7 @@ LOGGING = {
 
 # 允许跨域请求访问
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
+
 
 
 # DRF相关配置
@@ -224,7 +224,7 @@ AUTH_USER_MODEL = "user.UserInfo"
 JWT_AUTH = {
 
     # token的有效时间
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3000),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3600),
     # jwt返回数据的格式
     'JWT_RESPONSE_PAYLOAD_HANDLER':
         'user.service.jwt_response_payload_handler',
@@ -282,4 +282,18 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
+}
+
+# 支付宝配置信息
+ALIAPY_CONFIG = {
+    # "gateway_url": "https://openapi.alipay.com/gateway.do?", # 真实支付宝网关地址
+    "gateway_url": "https://openapi.alipaydev.com/gateway.do?",  # 沙箱支付宝网关地址
+    "appid": "2021000116670893",
+    "app_notify_url": None,
+    "app_private_key_path": open(os.path.join(BASE_DIR, "apps/payments/keys/app_private_key.pem")).read(),
+    "alipay_public_key_path": open(os.path.join(BASE_DIR, "apps/payments/keys/alipay_public_key.pem")).read(),
+    "sign_type": "RSA2",
+    "debug": False,
+    "return_url": "http://localhost:8080/result",  # 同步回调地址
+    "notify_url": "http://api.baizhiedu.com:8000/payments/result",  # 异步结果通知
 }

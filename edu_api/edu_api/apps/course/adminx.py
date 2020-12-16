@@ -76,7 +76,7 @@ xadmin.site.register(models.CoursePriceDiscount, CoursePriceDiscountAdmin)
 
 
 class CourseExpireAdmin(object):
-    """课程与价格策略关系表"""
+    """课程有效期"""
     pass
 
 

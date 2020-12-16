@@ -17,7 +17,7 @@ class UserModelSerializer(ModelSerializer):
 
     class Meta:
         model = UserInfo
-        fields = ("phone", "password", "id", "username", "token", "sms_code")
+        fields = ('username', 'password', 'token', 'sms_code', 'id', 'phone')
 
         extra_kwargs = {
             "phone": {
@@ -42,12 +42,12 @@ class UserModelSerializer(ModelSerializer):
         sms_code = attrs.get("sms_code")
 
         # 验证手机号
-        if not re.match(r'^1(3[0-9]|4[01456879]|5[0-3,5-9]|6[2567]|7[0-8]|8[0-9]|9[0-3,5-9])\d{8}$', phone):
+        if not re.match(r'^1[3-9]\d{9}$', phone):
             raise serializers.ValidationError('手机号格式不正确')
 
         # 验证密码  最少8位 两到三种字符
-        if not re.match(r'^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)(?!([^(0-9a-zA-Z)])+$).{8,20}$', password):
-            raise serializers.ValidationError('密码格式不正确,密码格式为包含数字, 英文, 字符中的两种以上，且长度为8-20')
+        if not re.match(r'^[a-zA-Z0-9]{6,8}$',password):
+            raise serializers.ValidationError('密码格式不正确')
         # 验证手机号是否已存在
         try:
             user = get_user_by_account(phone)
@@ -86,7 +86,7 @@ class UserModelSerializer(ModelSerializer):
             phone=phone,
             username=name,
             password=hash_pwd,
-            email=phone + '@163.com'
+
         )
 
         # 为注册成功的用户生成token  完成自动登录

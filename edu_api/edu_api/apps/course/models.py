@@ -191,14 +191,57 @@ class Course(BaseModel):
 
             return price
 
-    def final_price(self):
-        """
-        1. 判断当前课时是否永久有效  expire_id > 0
-        2. 根据有效期的id拿到有效期对应的价格
-        3. 根据有效期价格进行优惠活动处理
-        4. 根据不同的规则计算出最终价格
-        :return:
-        """
+    def final_price(self, expire_id):
+        # 如果有效期的id大于0，则需要通过有效期对应的价格来计算活动真实价  id不大于0则使用课程本身的原价
+        original_price = self.price
+
+        try:
+            if expire_id > 0:
+                course_expire = CourseExpire.objects.get(id=expire_id)
+                # 对应有效期的价格
+                original_price = course_expire.price
+        except CourseExpire.DoesNotExist:
+            pass
+
+        active_list = self.active_list()
+
+        if len(active_list) > 0:
+            """如果课程参与活动才计算活动价格"""
+            active = active_list[0]
+
+            # 判断原价是否满足参与优惠的门槛
+            condition = active.discount.condition
+            sale = active.discount.sale
+            self.price = float(original_price)
+            if self.price >= condition:
+                # 判断当前课程满足哪一种优惠条件
+                if sale == "":
+                    # 限时免费
+                    price = 0
+                elif sale[0] == "*":
+                    # 折扣
+                    price = self.price * float(sale[1:])
+                elif sale[0] == "-":
+                    price = self.price - float(sale[1:])
+                elif sale[0] == "满":
+                    print(197)
+                    """满减 500-40 400-30"""
+                    sale_split = sale.split("\r\n")
+                    # 处理策略 将满足条件的策略放入列表中
+                    price_list = []
+                    for sale_item in sale_split:
+                        item = sale_item[1:]
+                        condition_price, condition_sale = item.split("-")
+                        if self.price >= float(condition_price):
+                            price_list.append(float(condition_sale))
+
+                    if len(price_list) > 0:
+                        # 课程原价减去满足当前条件最大优惠
+                        price = self.price - max(price_list)
+            else:
+                # price = 0
+                price = self.price
+            return price
 
 
     @property

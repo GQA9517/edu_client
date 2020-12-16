@@ -8,13 +8,13 @@
       </div>
       <div class="login_box">
         <div class="title">
-          <span @click="pwdgo">密码登录</span>
-          <span @click="duanxingo">短信登录</span>
+          <span @click="choice1">密码登录</span>
+          <span @click="choice2">短信登录</span>
         </div>
-        <div class="inp" v-if="type">
+        <div class="inp" v-if="msg1">
           <input type="text" placeholder="用户名 / 手机号码 / 邮箱" class="user" v-model="username">
           <input type="password" name="" class="pwd" placeholder="密码" v-model="password">
-          <div id="mygeetest"></div>
+          <div id="captcha"></div>
           <div class="rember">
             <p>
               <input type="checkbox" class="no" v-model="remember_me"/>
@@ -24,16 +24,18 @@
           </div>
           <button class="login_btn btn btn-primary" @click="get_captcha">登录</button>
           <p class="go_login">没有账号
-            <router-link to="/register/">立即注册</router-link>
+            <router-link to="/register">立即注册</router-link>
           </p>
         </div>
-        <div class="inp"  v-else>
-          <input type="text" placeholder="手机号码" class="user" v-model="phone1">
-          <input type="text" class="pwd" placeholder="短信验证码" v-model="phone_code">
-          <button id="get_code" class="btn btn-primary" @click="get_code">获取验证码</button>
-          <button class="login_btn" @click="login">登录</button>
+        <div class="inp" v-show="msg2">
+          <input type="text" placeholder="手机号码" class="user" v-model="phone" @blur="check_phone">
+          <div class="sms-box">
+            <input v-model="code" type="text" maxlength="6" placeholder="输入验证码" class="user">
+            <div class="sms-btn" id="time"><el-button plain @click="phone_captcha" size="mini">获取验证码</el-button><span v-if="!display">-{{ times}}秒</span></div>
+          </div>
+          <button class="login_btn" @click="user_logins">登录</button>
           <span class="go_login">没有账号
-              <router-link to="/register/">立即注册</router-link>
+            <router-link to="/register">立即注册</router-link>
           </span>
         </div>
       </div>
@@ -46,102 +48,130 @@ export default {
   name: "Login",
   data() {
     return {
-      username: "",
-      password: "",
+      username: '',
+      password: '',
       remember_me: false,
-      type:true,
-      phone1:'',
-      phone_code:'',
-      stop:true,
-      sms_code:'1111111',
+      msg1: true,
+      msg2: false,
+      phone: '',
+      phone_flag: false,
+      code: '',
+      display:true,
+      times: 60
     }
   },
+  created() {
+    let username = localStorage.getItem('username')
+    let password = localStorage.getItem('password')
+    if (username && password) {
+      this.username = username
+      this.password = password
+      this.remember_me = true
+    }
+  },
+//计数器
   methods: {
-    get_code() {
-      let phone_rule=/^1(3[0-9]|4[01456879]|5[0-3,5-9]|6[2567]|7[0-8]|8[0-9]|9[0-3,5-9])\d{8}$/
-      if(this.phone1===''){
-        alert('手机号不能为空')
-        this.stop=true
-        return 0
-      }
-      else if(!phone_rule.test(this.phone1)){
-        alert('手机号格式不正确')
-        this.stop=true
-      }
-      else{
-        this.stop=false
-      }
-
-      if(this.stop===false){
+    clock: function () {
+      this.display = false
+      this.timer = setInterval(() => {
+        this.times --
+        if (this.times === 0) {
+          this.display = true
+          clearInterval(this.timer)
+        }
+      }, 1000)
+    },
+    phone_captcha() {
+      if(this.phone_flag){
         this.$axios({
-          url: this.$settings.HOST + "user/message/",
+          url: this.$settings.HOST + 'user/message/',
           method: 'get',
           params: {
-            phone: this.phone1
+            phone: this.phone,
           }
-        }).then(res => {
-          this.sms_code=res.data.code
-          console.log(this.sms_code);
+        }).then(response => {
+          console.log(response)
+          this.clock()
         }).catch(error => {
-          console.log(error);
+          console.log(error)
+          this.$message({
+            message: "验证码错误",
+            type: 'error',
+            duration: 1000,
+          })
         })
       }
-
     },
 
-    login(){
-      let phone_rule=/^1(3[0-9]|4[01456879]|5[0-3,5-9]|6[2567]|7[0-8]|8[0-9]|9[0-3,5-9])\d{8}$/
-      if(this.phone1===''){
-        alert('手机号不能为空')
-        this.stop=true
-        return 0
+//短信登录
+    user_logins() {
+      if (this.phone === '' || this.code === '') {
+        this.$message({
+          message: "手机号或验证码不能为空",
+          type: 'success',
+          duration: 2000,
+          showClose: true,
+        })
       }
-      else if(!phone_rule.test(this.phone1)){
-        alert('手机号格式不正确')
-        this.stop=true
-      }
-      else if(parseInt(this.phone_code)!==this.sms_code){
-        this.stop=true
-        alert('短信验证码不正确')
-      }
-      else{
-        this.stop=false
-      }
-      if(this.stop===false){
+      else if (this.phone_flag){
         this.$axios({
-          url: this.$settings.HOST + "user/phone_login/",
+          url: this.$settings.HOST + 'user/login_phone/',
           method: 'post',
           data: {
-            phone: this.phone1
+            phone: this.phone,
+            code: this.code
           }
-        }).then(res => {
-          console.log(res.data);
-          console.log(res.data.data.username);
-          console.log(res.data.data.id);
-          let username=res.data.data.username
-          console.log(username,typeof(username))
-          let LoginInfo1 = {
-            name: username,
-            islogin: true,
-            remember_me: this.remember_me,
-          }
-          LoginInfo1 = JSON.stringify(LoginInfo1)
-          localStorage.setItem('LoginInfo', LoginInfo1)
-          this.$message({
-            message: "恭喜你，登录成功",
-            type: 'success',
-            duration: 2000
+        }).then(response => {
+          console.log(response.data.data.token)
+          localStorage.setItem('token', response.data.data.token)
+          sessionStorage.setItem('token', response.data.data.token)
+          let self = this;
+          this.$alert("登录成功", "百知教育", {
+            callback() {
+              self.$router.push("/")
+            }
           })
-          // 登录成功后返回首页
-          this.$router.push("/")
         }).catch(error => {
-          console.log(error);
+          console.log(error)
+          this.$message({
+            message: "登陆失败",
+            type: 'error',
+            duration: 1000,
+          })
         })
       }
     },
 
-    // 点击登录按钮时 获取滑块验证码
-    get_captcha() {
+//检测手机号是否存在
+    check_phone() {
+      this.$axios({
+        url: this.$settings.HOST + "user/phone_code/",
+        method: 'post',
+        data: {
+          phone: this.phone,
+        }
+      }).then(response => {
+        console.log(response)
+        this.phone_flag = true
+      }).catch(error => {
+        console.log(error)
+        this.$message({
+          message: "手机号不正确",
+          type: 'success',
+          duration: 1000,
+        })
+      })
+    },
+
+    // 点击登录按钮式 获取滑块验证码
+    get_captcha: function () {
+      if (this.username === '' || this.password === '') {
+        this.$message({
+          message: "账号或密码不能为空",
+          type: 'success',
+          duration: 1000,
+        })
+      }
       this.$axios({
         url: this.$settings.HOST + "user/captcha/",
         method: 'get',
@@ -153,7 +183,7 @@ export default {
         // 使用initGeetest接口
         // 参数1：配置参数
         // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
-        window.initGeetest({
+        initGeetest({
           gt: data.gt,
           challenge: data.challenge,
           product: "popup", // 产品形式，包括：float，embed，popup。注意只对PC版验证码有效
@@ -185,53 +215,61 @@ export default {
           // 如果滑块验证码的验证结果为True，则完成登录
           if (res.data.status) {
             self.user_login();
+            // // 存取token
+            localStorage.setItem('token', res.data.token)
           }
         }).catch(error => {
           console.log(error);
         })
       })
-
-      document.getElementById("mygeetest").innerHTML = "";
-      captchaObj.appendTo("#mygeetest");
+      // 将验证码加到id为captcha的元素里
+      document.getElementById("captcha").innerHTML = "";
+      captchaObj.appendTo("#captcha");
     },
 
-    // 用户登录请求
+    // 用户登录
     user_login() {
       this.$axios({
-        url: this.$settings.HOST + "user/login/",
+        url: this.$settings.HOST + 'user/sign_up/',
         method: 'post',
         data: {
           username: this.username,
           password: this.password,
         }
-      }).then(res => {
-        // 判断是否记住密码  保存用户信息
-        console.log(res.data)
-        let LoginInfo1 = {
-          name: this.username,
-          islogin: true,
-          remember_me: this.remember_me,
-        }
-        LoginInfo1 = JSON.stringify(LoginInfo1)
-        localStorage.setItem('LoginInfo', LoginInfo1)
+      }).then(response => {
+        console.log(response.data)
         this.$message({
-          message: "恭喜你，登录成功",
+          message: "登录成功",
           type: 'success',
-          duration: 2000
+          duration: 1000,
         })
-        // 登录成功后返回首页
-        this.$router.push("/")
+        if (this.remember_me) {
+          localStorage.setItem('username', this.username)
+          localStorage.setItem('password', this.password)
+        } else {
+          delete localStorage.username
+          delete localStorage.password
+        }
+        localStorage.setItem('token', response.data.token)
+        sessionStorage.setItem('token', response.data.token)
+        this.$router.push('/')
       }).catch(error => {
         console.log(error);
-        this.$message.error("用户名或密码错误")
+        this.$message({
+          message: "用户名或密码错误",
+          type: 'error',
+          duration: 1000,
+        })
       })
     },
-    pwdgo(){
-      this.type=true
+    choice1: function () {
+      this.msg1 = true
+      this.msg2 = false
     },
-    duanxingo(){
-      this.type=false
-    },
+    choice2: function () {
+      this.msg1 = false
+      this.msg2 = true
+    }
   }
 }
 </script>
@@ -402,4 +440,5 @@ export default {
   color: #84cc39;
   cursor: pointer;
 }
+
 </style>

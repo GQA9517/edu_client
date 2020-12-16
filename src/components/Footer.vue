@@ -1,7 +1,7 @@
 <template>
   <div class="footer">
     <ul>
-      <li v-for="(banner, index) in nav_list" :key="index">
+      <li v-for="(banner, index) in banner_list" :key="index">
         <p @click="go(index)">{{ banner.title }}</p>
       </li>
     </ul>
@@ -13,13 +13,13 @@ export default {
   name: "Footer",
   data() {
     return {
-      nav_list: [],
+      banner_list: [],
     }
   },
   methods: {
     get_all_banner() {
       this.$axios({
-        url: this.$settings.HOST + "home/nav/",
+        url: this.$settings.HOST + "home/down_nav/",
         method: 'get',
       }).then(res => {
         let list1=[]
@@ -28,14 +28,14 @@ export default {
             list1.push(res.data[i])
           }
         }
-        this.nav_list = list1;
+        this.banner_list = list1;
         console.log(res.data)
       }).catch(error => {
         console.log(error);
       })
     },
     go(index){
-      location.href=this.nav_list[index].link
+      location.href=this.banner_list[index].link
     },
   },
   created() {
