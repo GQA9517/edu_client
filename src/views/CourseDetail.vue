@@ -214,7 +214,7 @@ export default {
       })
     },
 
-//获取当前课程对应的章节列表和课时列表
+    //获取当前课程对应的章节列表和课时列表
     get_course_chapter()
     {
       this.$axios({
