@@ -31,7 +31,10 @@
           <input type="text" placeholder="手机号码" class="user" v-model="phone" @blur="check_phone">
           <div class="sms-box">
             <input v-model="code" type="text" maxlength="6" placeholder="输入验证码" class="user">
-            <div class="sms-btn" id="time"><el-button plain @click="phone_captcha" size="mini">获取验证码</el-button><span v-if="!display">-{{ times}}秒</span></div>
+            <div class="sms-btn" id="time">
+              <button @click="phone_captcha" v-if="show_time">获取验证码</button>
+              <button @click="phone_captcha" v-else>{{auth_time}}秒后重新获取</button>
+            </div>
           </div>
           <button class="login_btn" @click="user_logins">登录</button>
           <span class="go_login">没有账号
@@ -57,7 +60,8 @@ export default {
       phone_flag: false,
       code: '',
       display:true,
-      times: 60
+      show_time:true,
+      auth_time:0,
     }
   },
   created() {
@@ -69,15 +73,16 @@ export default {
       this.remember_me = true
     }
   },
-//计数器
+
   methods: {
-    clock: function () {
-      this.display = false
-      this.timer = setInterval(() => {
-        this.times --
-        if (this.times === 0) {
-          this.display = true
-          clearInterval(this.timer)
+    timeing() {
+      this.show_time = false
+      this.auth_time = 60
+      let timeed = setInterval(() => {
+        this.auth_time--
+        if (this.auth_time <= 0) {
+          this.show_time = true
+          console.log(timeed)
         }
       }, 1000)
     },
@@ -91,7 +96,7 @@ export default {
           }
         }).then(response => {
           console.log(response)
-          this.clock()
+          this.timeing()
         }).catch(error => {
           console.log(error)
           this.$message({
@@ -103,7 +108,7 @@ export default {
       }
     },
 
-//短信登录
+    //短信登录
     user_logins() {
       if (this.phone === '' || this.code === '') {
         this.$message({
@@ -142,7 +147,7 @@ export default {
       }
     },
 
-//检测手机号是否存在
+    //检测手机号是否存在
     check_phone() {
       this.$axios({
         url: this.$settings.HOST + "user/phone_code/",

@@ -144,7 +144,7 @@ export default {
       let token = localStorage.token || sessionStorage.token;
       if (!token) {
         let self = this;
-        this.$confirm("Sorry,请登录后再进行添加购物车", {
+        this.$confirm("对不起,请登录后再进行添加购物车", {
           callback() {
             self.$router.push("/login")
           }
@@ -222,12 +222,11 @@ export default {
         method: 'get',
       }).then(response => {
         this.chapter_list = response.data
-        console.log(209, response.data)
+        console.log(225, response.data)
       }).catch(error => {
         console.log(error.response)
       })
-    }
-    ,
+    },
   },
   created()
   {

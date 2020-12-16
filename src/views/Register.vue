@@ -10,7 +10,8 @@
           <div id="geetest"></div>
           <div class="sms-box">
             <input v-model="sms_code" type="text" maxlength="6" placeholder="输入验证码" class="user">
-            <div class="sms-btn" @click="get_code">获取验证码</div>
+            <div class="sms-btn" @click="get_code" v-if="show_time">获取验证码</div>
+            <div class="sms-btn" @click="get_code" v-else>{{auth_time}}秒后重新获取</div>
           </div>
           <button class="register_btn" @click="user_register">注册</button>
           <p class="go_login">已有账号
@@ -31,9 +32,23 @@ export default {
       password: '',
       sms_code: '',
       register_flag: false,
+      show_time:true,
+      auth_time:0,
     }
   },
   methods: {
+    timeing() {
+      this.show_time = false
+      this.auth_time = 60
+      let timeed = setInterval(() => {
+        this.auth_time--
+        if (this.auth_time <= 0) {
+          this.show_time = true
+          console.log(timeed)
+        }
+      }, 1000)
+    },
+
     get_code() {
       this.$axios({
         url: this.$settings.HOST + 'user/message/',
@@ -43,6 +58,7 @@ export default {
         }
       }).then(response => {
         console.log(response)
+        this.timeing()
       }).catch(error => {
         console.log(error)
         this.$message({
